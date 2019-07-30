@@ -4,35 +4,32 @@
  /// @date    2019-07-24 11:32:07
  ///
  
+#include <stdlib.h>
+#include <pthread.h>
+
 #include <iostream>
 using std::cout;
 using std::endl;
 
 
 //单例对象自动释放
-//方法一: 嵌套类 + 静态对象
+//方法三: pthread_once + atexit
 
 
 class Singleton
 {
-	class AutoRelease
-	{
-	public:
-		AutoRelease() {	cout << "AutoRelease()" << endl;}
-		~AutoRelease() {
-			cout << "~AutoRelease()" << endl;
-			if(_pInstance)
-				delete _pInstance;
-		}
-	};
 public:
 	static Singleton * getInstance()
-	{ //在多线程环境下是非线程安全的
-	  // 加锁
-		if(nullptr == _pInstance) {
-			_pInstance = new Singleton();
-		}
+	{ 
+		//多线程安全的
+		pthread_once(&_once, init);
 		return _pInstance;
+	}
+
+	static void init()
+	{
+		_pInstance = new Singleton();
+		::atexit(destroy);
 	}
 
 	static void destroy()
@@ -47,15 +44,12 @@ private:
 private:
 	//非静态数据成员就是单例对象的一部分
 	static Singleton * _pInstance;
-	static AutoRelease _auto;
+	static pthread_once_t _once;
 };
 
-//Singleton * Singleton::_pInstance = nullptr;//懒汉模式
-//
-//在进入main函数之前就创建单例对象
-Singleton * Singleton::_pInstance = getInstance();//饿汉模式
+Singleton * Singleton::_pInstance = nullptr;//懒汉模式
+pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT;
 
-Singleton::AutoRelease Singleton::_auto;
 
  
 int main(void)
@@ -66,8 +60,6 @@ int main(void)
 	cout << "p1 = " << p1 << endl
 		 << "p2 = " << p2 << endl
 		 << "p3 = " << p3 << endl;
-
-	//Singleton::destroy();
 
 	return 0;
 }
