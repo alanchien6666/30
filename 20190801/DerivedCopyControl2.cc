@@ -10,6 +10,7 @@ using std::cout;
 using std::endl;
 
 
+#if 0
 class Noncopyable
 {
 protected:
@@ -19,11 +20,12 @@ protected:
 	Noncopyable(const Noncopyable & )=delete;
 	Noncopyable & operator=(const Noncopyable &)=delete;
 };
+#endif
 
 
 
 class Base
-: Noncopyable
+//: Noncopyable
 {
 public:
 	Base(const char * data1)
@@ -33,7 +35,7 @@ public:
 		cout << "Base(const char * data1)" << endl;
 	}
 
-#if 0
+#if 1
 	Base(const Base & rhs)
 	: _data1(new char[strlen(rhs._data1) + 1]())
 	{
@@ -90,7 +92,7 @@ public:
 	//Derived(const Derived & rhs) = delete;
 	//Derived & operator=(const Derived & rhs) = delete;
 
-#if 0
+#if 1
 	Derived(const Derived & rhs)
 	: Base(rhs) //显式调用
 	, _data2(new char[strlen(rhs._data2) + 1]())

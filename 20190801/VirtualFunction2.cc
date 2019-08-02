@@ -53,8 +53,8 @@ public:
 	//在形式上保持一致
 	//
 #if 1
-	//virtual 
-	void print() const
+	virtual 
+	void print() const override
 	{
 		cout << ">> _derived = " << _derived << endl;
 	}
@@ -84,8 +84,11 @@ public:
 	, _derived2(derived)
 	{}
 
+	//virtual static void display()
+	//{}
+
 	//virtual 
-	void print() const
+	void print() const override
 	{
 		cout << ">> _derived2 = " << _derived2 << endl;
 	}
