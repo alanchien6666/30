@@ -4,6 +4,7 @@
  /// @date    2019-08-05 11:03:36
  ///
  
+#include <string.h>
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -36,19 +37,32 @@ int add(int x, int y)
 	return x + y;
 }
 #endif
- 
+
+//模板的特化(specialization)
+template <>
+const char * add<const char *>(const char * pstr1, const char * pstr2)
+{
+	char * ptmp = new char[strlen(pstr1) + strlen(pstr2) + 1]();
+	strcpy(ptmp, pstr1);
+	strcat(ptmp, pstr2);
+	return ptmp;
+}
+
 int main(void)
 {
 	int d1 = 1, d2 = 2;
 	double d3 = 1.1, d4 = 2.2;
 	char d5 = 'a', d6 = 1;
+	const char * p1 = "hello";
+	const char * p2 = "world";
 	cout << "add(d1, d2) = " << add(d1, d2) << endl;//隐式实例化
 	cout << "add(d3, d4) = " << add<double>(d3, d4) << endl;//显式实例化
 	cout << "add(d5, d6) = " << add(d5, d6) << endl;
 
 	int d7 = 3;
 	cout << "add(d1, d2, d7) = " << add(d1, d2, d7) << endl;
- 
+
+	cout << "add(p1, p2) = " << add(p1, p2) << endl;
 
 	return 0;
 }
