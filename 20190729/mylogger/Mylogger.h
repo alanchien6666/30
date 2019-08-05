@@ -20,6 +20,13 @@ public:
 	static void destroy();
 
 	void error(const char * msg);
+
+	template <typename... Args>
+	void error(Args... args)
+	{
+		_mycategory.error(args...);
+	}
+
 	void warn(const char * msg);
 	void info(const char * msg);
 	void debug(const char * msg);
