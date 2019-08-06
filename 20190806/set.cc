@@ -17,6 +17,8 @@ using std::string;
 template <class Container>
 void display(const Container & c)
 {
+	//typename Container::value_type;
+
 	typename Container::const_iterator cit = c.begin();
 	while(cit != c.end()) {
 		cout << *cit << " ";
