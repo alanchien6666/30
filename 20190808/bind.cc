@@ -55,8 +55,9 @@ int test0(void)
 
 void test1()
 {
-	Function f = display;
-	f();
+	//f称为回调函数
+	Function f = display;// 注册回调函数
+	f();//执行回调函数
 
 	f = print;
 	f();
