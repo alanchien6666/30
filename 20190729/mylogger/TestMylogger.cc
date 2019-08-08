@@ -36,6 +36,7 @@ void test2()
 {
 	int number = 10;
 	LogError("this is error message, %d", number);
+	LogError("this is error message");
 	LogWarn("this is warn message");
 	LogInfo("this is info message");
 	LogDebug("this is debug message");
@@ -49,11 +50,10 @@ void test3()
  
 int main(void)
 {
-	int * pint = new int(10);
 	//test0();
 	//test1();
-	//test2();
-	test3();
+	test2();
+	//test3();
 
 	//wd::Mylogger::destroy();
 	return 0;
