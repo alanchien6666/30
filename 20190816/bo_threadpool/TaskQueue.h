@@ -8,14 +8,14 @@
 
 #include "MutexLock.h"
 #include "Condition.h"
-#include "Task.h"
 #include <queue>
+#include <functional>
 using std::queue;
 
 namespace wd
 {
 
-using ElemType = Task *;
+using ElemType = std::function<void()>;
 
 class TaskQueue
 {

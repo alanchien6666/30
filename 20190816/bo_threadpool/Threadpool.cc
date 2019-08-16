@@ -5,8 +5,6 @@
  ///
  
 #include "Threadpool.h"
-#include "WorkerThread.h"
-#include "Task.h"
 
 #include <unistd.h>
 
@@ -38,7 +36,8 @@ Threadpool::~Threadpool()
 void Threadpool::start()
 {
 	for(size_t idx = 0; idx != _threadNum; ++idx) {
-		unique_ptr<Thread> thread(new WorkerThread(*this));
+		unique_ptr<Thread> thread(new Thread(
+			std::bind(&Threadpool::threadFunc, this)));
 		_threads.push_back(std::move(thread));
 	}
 
@@ -47,13 +46,13 @@ void Threadpool::start()
 	}
 }
 
-void Threadpool::addTask(Task * task)
+void Threadpool::addTask(Task && task)
 {
-	_taskque.push(task);
+	_taskque.push(std::move(task));
 }
 
 
-Task * Threadpool::getTask()
+Task Threadpool::getTask()
 {
 	return _taskque.pop();
 }
@@ -62,9 +61,9 @@ Task * Threadpool::getTask()
 void Threadpool::threadFunc()
 {
 	while(!_isExit) {
-		Task * task = getTask();
+		Task task = getTask();
 		if(task)
-			task->process();//执行任务
+			task();//执行任务
 	}
 }
 

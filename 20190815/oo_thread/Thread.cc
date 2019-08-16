@@ -38,7 +38,7 @@ void * Thread::threadFunc(void * arg)
 {
 	Thread * pthread = static_cast<Thread *>(arg);
 	if(pthread)
-		pthread->run();//执行任务
+		pthread->run();//执行任务, 有多态
 	return nullptr;
 }
 

@@ -37,7 +37,7 @@ int main(void)
 	//Mythread thread2 = thread1;//error 禁止复制
 
 	unique_ptr<Thread> thread(new Mythread());
-	thread->start();
+	thread->start();//产生子线程
 	thread->join();
 	//::sleep(10);
 	return 0;

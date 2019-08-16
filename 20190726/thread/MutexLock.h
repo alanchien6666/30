@@ -61,6 +61,7 @@ private:
 };
 
 
+//RAII
 class MutexLockGuard
 {
 public:
