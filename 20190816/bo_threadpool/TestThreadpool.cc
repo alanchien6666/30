@@ -42,7 +42,7 @@ int main(void)
 		cout << ">> main thread : cnt = " << cnt << endl;
 	}
 
-	threadpool.stop();
+	//threadpool.stop();
 
 	return 0;
 }
