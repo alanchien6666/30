@@ -14,7 +14,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-#if 0
+#if 1
 class Task
 {
 public:
@@ -58,13 +58,14 @@ void onMessage(const wd::TcpConnectionPtr & conn)
 	//decode
 	//compute
 	//encode
+
 	//::sleep(2);//碰到需要长时间的处理时，响应速度会降下来
 	//conn->send(msg);
-	//Task task(msg, conn);
+	Task task(msg, conn);
 
 	//拿到线程池之后，就将该任务交给线程池去执行
-	//Threadpool * pthreadpool;
-	//pthreadpool->addTask(std::bind(&Task::process, task));
+	Threadpool * pthreadpool;
+	pthreadpool->addTask(std::bind(&Task::process, task));
 }
 
 void onClose(const wd::TcpConnectionPtr & conn)
