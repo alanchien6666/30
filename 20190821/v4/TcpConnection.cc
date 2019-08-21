@@ -7,6 +7,7 @@
 
 #include "TcpConnection.h"
 #include "InetAddress.h"
+#include "EventLoop.h"
 
 #include <errno.h>
 #include <stdlib.h>
@@ -16,12 +17,13 @@
 
 namespace wd
 {
-TcpConnection::TcpConnection(int fd)
+TcpConnection::TcpConnection(int fd, EventLoop * loop)
 : _sock(fd)
 , _socketIo(fd)
 , _localAddr(getLocalAddr(fd))
 , _peerAddr(getPeerAddr(fd))
 , _isShutdwonWrite(false)
+, _loop(loop)
 {
 }
 
@@ -42,6 +44,12 @@ string TcpConnection::receive()
 void TcpConnection::send(const string & msg)
 {
 	_socketIo.writen(msg.c_str(), msg.size());
+}
+
+void TcpConnection::sendInLoop(const string & msg)
+{
+	if(_loop)
+		_loop->runInLoop(std::bind(&TcpConnection::send, this, msg));
 }
 
 void TcpConnection::shutdown()

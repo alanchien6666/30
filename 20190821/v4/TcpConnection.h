@@ -25,16 +25,19 @@ class TcpConnection;
 using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
 using TcpConnectionCallback = function<void(const TcpConnectionPtr&)>;
 
+class EventLoop;
+
 class TcpConnection
 : Noncopyable
 , public std::enable_shared_from_this<TcpConnection>
 {
 public:
-	TcpConnection(int fd);
+	TcpConnection(int fd, EventLoop * loop);
 	~TcpConnection();
 
 	string receive();
 	void send(const string & msg);
+	void sendInLoop(const string & msg);
 
 	string toString() const;
 	void shutdown();
@@ -55,6 +58,8 @@ private:
 	InetAddress _localAddr;
 	InetAddress _peerAddr;
 	bool _isShutdwonWrite;
+
+	EventLoop * _loop;
 
 	TcpConnectionCallback _onConnection;
 	TcpConnectionCallback _onMessage;

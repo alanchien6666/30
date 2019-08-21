@@ -34,13 +34,12 @@ public:
 		//decode
 		//compute
 		//encode
-		cout << ">>" << current_thread::threadName << endl;
-		cout << ": task process() " << endl;
+		cout << ">>" << current_thread::threadName << ": task process() " << endl;
 		string response = _msg;//要返回给客户端的消息
-		_conn->send(response);//由线程池的线程(计算线程)完成数据的发送,在设计上来说，是不合理的
+		//_conn->send(response);//由线程池的线程(计算线程)完成数据的发送,在设计上来说，是不合理的
 							  //数据发送的工作要交还给IO线程(Reactor所在的线程)完成
 							  //将send的函数的执行延迟到IO线程去操作
-		//_conn->sendInLoop(response);
+		_conn->sendInLoop(response);
 	}
 private:
 	string _msg;
@@ -80,6 +79,34 @@ void onClose(const wd::TcpConnectionPtr & conn)
 }
 
 
+
+class TextQuery
+{
+public:
+	void query(const string & msg);//处理业务逻辑
+
+};
+
+
+class EchoServer
+{
+public:
+
+	void onConection(const TcpConnectionPtr & conn);
+	void onMessage(const TcpConnectionPtr & conn)
+	{
+		//_threadpool.addTask(std::bind(&TextQuery::query, tq));
+	}
+	void onClose(const TcpConnectionPtr & conn);
+
+	//void process();
+
+private:
+	Threadpool _threadpool;
+	TcpServer _server;
+};
+
+
 int main(void)
 {
 	Threadpool threadpool(4, 10);
@@ -87,7 +114,7 @@ int main(void)
 
 	gThreadpool = &threadpool;
 
-	wd::TcpServer server("192.168.30.128", 8888);
+	TcpServer server("192.168.30.128", 8888);
 
 	server.setConnectionCallback(onConnection);
 	server.setMessageCallback(onMessage);

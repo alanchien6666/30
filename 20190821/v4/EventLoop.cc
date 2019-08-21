@@ -7,7 +7,9 @@
 #include "Acceptor.h"
 #include "TcpConnection.h"
 
+#include <unistd.h>
 #include <assert.h>
+#include <sys/eventfd.h>
 
 #include <iostream>
 using std::cout;
@@ -18,11 +20,13 @@ namespace wd
 
 EventLoop::EventLoop(Acceptor & acceptor)
 : _efd(createEpollFd())
+, _eventfd(createEventfd())
 , _acceptor(acceptor)
 , _eventList(1024)
 , _isLooping(false)
 {
 	addEpollFdRead(_acceptor.fd());
+	addEpollFdRead(_eventfd);
 }
 
 void EventLoop::loop()
@@ -37,6 +41,16 @@ void EventLoop::unloop()
 {
 	if(_isLooping) 
 		_isLooping = false;
+}
+
+void EventLoop::runInLoop(Functor && cb)
+{
+	{
+	MutexLockGuard autolock(_mutex);
+	_pendingFunctors.push_back(std::move(cb));
+	}
+
+	wakeup();
 }
 
 void EventLoop::waitEpollFd()
@@ -63,7 +77,13 @@ void EventLoop::waitEpollFd()
 				if(_eventList[idx].events & EPOLLIN) {
 					handleNewConnection();
 				}
-			}else {
+			} else if (fd == _eventfd) {
+				if(_eventList[idx].events & EPOLLIN) {
+					handleRead();
+					cout << " doPendingFunctors()" << endl;
+					doPendingFunctors();
+				}
+			} else {
 				//处理消息
 				if(_eventList[idx].events & EPOLLIN) {
 					handleMessage(fd);
@@ -77,7 +97,7 @@ void EventLoop::handleNewConnection()
 {
 	int peerfd = _acceptor.accept();
 	addEpollFdRead(peerfd);
-	TcpConnectionPtr conn(new TcpConnection(peerfd));
+	TcpConnectionPtr conn(new TcpConnection(peerfd, this));
 	conn->setConnectionCallback(_onConnection);
 	conn->setMessageCallback(_onMessage);
 	conn->setCloseCallback(_onClose);
@@ -142,4 +162,45 @@ void EventLoop::delEpollFdRead(int fd)
 		perror("epoll_ctl");
 	}
 }
+
+int EventLoop::createEventfd()
+{
+	int fd = ::eventfd(0, 0);
+	if(fd == -1) {
+		perror(">> eventfd");
+	}
+	return fd;
+}
+	
+void EventLoop::handleRead()
+{
+	uint64_t howmany; 
+	int ret = ::read(_eventfd, &howmany, sizeof(howmany));
+	if(ret != sizeof(howmany)) {
+		perror(">> read");
+	}
+}
+	
+void EventLoop::wakeup()
+{
+	uint64_t one = 1;
+	int ret = ::write(_eventfd, &one, sizeof(one));
+	if(ret != sizeof(one)) {
+		perror(">> write");
+	}
+}
+
+void EventLoop::doPendingFunctors()
+{
+	vector<Functor> tmp;
+	{
+	MutexLockGuard autolock(_mutex);
+	_pendingFunctors.swap(tmp);
+	}
+	
+	for(auto & functor : tmp) {
+		functor();
+	}
+}
+
 }//end of namespace wd
