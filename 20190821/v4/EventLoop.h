@@ -31,6 +31,7 @@ public:
 	using TcpConnectionCallback = std::function<void(const TcpConnectionPtr&)>;
 	using Functor = std::function<void()>;
 	EventLoop(Acceptor & acceptor);
+	~EventLoop();
 	void loop();
 	void unloop();
 	void runInLoop(Functor && cb);

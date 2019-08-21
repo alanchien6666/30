@@ -29,6 +29,12 @@ EventLoop::EventLoop(Acceptor & acceptor)
 	addEpollFdRead(_eventfd);
 }
 
+EventLoop::~EventLoop()
+{
+	close(_efd);
+	close(_eventfd);
+}
+
 void EventLoop::loop()
 {
 	_isLooping = true;
